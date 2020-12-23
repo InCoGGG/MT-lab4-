@@ -17,6 +17,7 @@ const Main = () => {
   const [figuresCorrect, setFiguresCorrect] = useState(null);
   const [clicked, setClicked] = useState(null);
   const [finish, setFinish] = useState(true);
+  const [preview, setPreview] = useState(false);
 
   useEffect(() => {
     restart();
@@ -101,10 +102,21 @@ const Main = () => {
         arrayFiguresCorrect[positions[1]] = true;
         setFiguresCorrect(arrayFiguresCorrect);
       }
-      arrayClicked[positions[0]] = false;
-      arrayClicked[positions[1]] = false;
+      else {
+        setPreview(true);
+        arrayClicked[positions[1]] = true;
+        arrayClicked[positions[0]] = true;
+      }
+      setTimeout(() => {
+        setClicked(arrayClicked => {
+          const arr = [...arrayClicked];
+          arr[positions[0]] = arr[positions[1]] = false;
+          return arr;
+        });
+        setPreview(false);
+      }, 500)
     }
-    setClicked(arrayClicked);
+      setClicked(arrayClicked);
   };
 
   if (!figures) {
@@ -113,19 +125,23 @@ const Main = () => {
 
   return (
     <View style={styles.view}>
+      <View style={styles.cardsContainer}>
       {
         figures.map((figure, index) => (
-          <TouchableOpacity key={index} style={styles.card} onPress={() => pressCard(index)}>
+          <View key={index} style={styles.cardContainer}>
+          <TouchableOpacity style={styles.card} onPress={() => !preview && pressCard(index)} tabIndex={index}>
             {
               (clicked[index] || figuresCorrect[index]) && (
                 <Image style={styles.cardImage} source={figure}/>
               )
             }
           </TouchableOpacity>
+            </View>
         ))
       }
-      <View>
-        <TouchableOpacity onPress={() => restart()} style={styles.restartButton}>
+      </View>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity onPress={() => restart()} style={styles.restartButton} tabIndex={1000}>
           <Text style={styles.restartButtonText}>Restart</Text>
         </TouchableOpacity>
       </View>
@@ -138,15 +154,24 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     display: 'flex',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: 'column',
     backgroundColor: '#373a4b',
     padding: 20,
   },
+  cardsContainer: {
+    display: "flex",
+    flex: 1,
+    flexWrap: 'wrap',
+  },
+  cardContainer: {
+    flexBasis: "25%",
+    alignItems: "center",
+    justifyContent: "center",
+    display: "flex"
+  },
   card: {
-    margin: 11.5,
-    width: 60,
-    height: 80,
+    width: "80%",
+    height: "80%",
     backgroundColor: '#008ABC',
     borderWidth: 2,
     borderColor: '#282a36',
@@ -156,14 +181,18 @@ const styles = StyleSheet.create({
   },
   cardImage: {
     margin: 0,
-    width: 38,
-    height: 38,
+    width: "80%",
+    height: "80%",
+    resizeMode: "contain"
+  },
+  buttonContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    marginTop: 40,
   },
   restartButton: {
-    margin: -3,
-    marginTop: 40,
     backgroundColor: '#008ABC',
-    width: 340,
+    width: "80%",
     height: 80,
     display: 'flex',
     alignItems: 'center',
